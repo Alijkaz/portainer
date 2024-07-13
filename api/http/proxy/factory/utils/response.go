@@ -74,6 +74,15 @@ func RewriteAccessDeniedResponse(response *http.Response) error {
 	return RewriteResponse(response, errorResponse{Message: "access denied to resource"}, http.StatusForbidden)
 }
 
+func WriteAccessForbiddenResponse() (*http.Response, error) {
+	return &http.Response{
+		Status:     "403 Forbidden",
+		StatusCode: http.StatusForbidden,
+		Header:     make(http.Header),
+		Body:       http.NoBody,
+	}, nil
+}
+
 // RewriteResponse will replace the existing response body and status code with the one specified
 // in parameters
 func RewriteResponse(response *http.Response, newResponseData any, statusCode int) error {

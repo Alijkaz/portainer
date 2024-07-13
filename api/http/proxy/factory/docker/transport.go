@@ -105,6 +105,12 @@ var prefixProxyFuncMap = map[string]func(*Transport, *http.Request, string) (*ht
 func (transport *Transport) ProxyDockerRequest(request *http.Request) (*http.Response, error) {
 	unversionedPath := apiVersionRe.ReplaceAllString(request.URL.Path, "")
 
+	isAdmin, _ := transport.isAdminOrEndpointAdmin(request)
+
+	if unversionedPath == "/commit" && ! isAdmin {
+		return utils.WriteAccessForbiddenResponse()
+	}
+
 	if transport.endpoint.Type == portainer.AgentOnDockerEnvironment || transport.endpoint.Type == portainer.EdgeAgentOnDockerEnvironment {
 		signature, err := transport.signatureService.CreateSignature(portainer.PortainerAgentSignatureMessage)
 		if err != nil {
@@ -200,6 +206,12 @@ func (transport *Transport) proxyAgentRequest(r *http.Request, unversionedPath s
 func (transport *Transport) proxyConfigRequest(request *http.Request, unversionedPath string) (*http.Response, error) {
 	requestPath := unversionedPath
 
+	isAdmin, _ := transport.isAdminOrEndpointAdmin(request)
+
+	if ! isAdmin {
+		return utils.WriteAccessForbiddenResponse()
+	}
+
 	switch requestPath {
 	case "/configs/create":
 		return transport.decorateGenericResourceCreationOperation(request, configObjectIdentifier, portainer.ConfigResourceControl)
@@ -224,8 +236,14 @@ func (transport *Transport) proxyConfigRequest(request *http.Request, unversione
 func (transport *Transport) proxyContainerRequest(request *http.Request, unversionedPath string) (*http.Response, error) {
 	requestPath := unversionedPath
 
+	isAdmin, _ := transport.isAdminOrEndpointAdmin(request)
+
 	switch requestPath {
 	case "/containers/create":
+		if ! isAdmin {
+			return utils.WriteAccessForbiddenResponse()
+		}
+
 		return transport.decorateContainerCreationOperation(request, containerObjectIdentifier, portainer.ContainerResourceControl)
 
 	case "/containers/prune":
@@ -251,6 +269,10 @@ func (transport *Transport) proxyContainerRequest(request *http.Request, unversi
 			containerID := path.Base(requestPath)
 
 			if request.Method == http.MethodDelete {
+				if ! isAdmin {
+					return utils.WriteAccessForbiddenResponse()
+				}
+
 				return transport.executeGenericResourceDeletionOperation(request, containerID, containerID, portainer.ContainerResourceControl)
 			}
 
@@ -263,6 +285,12 @@ func (transport *Transport) proxyContainerRequest(request *http.Request, unversi
 
 func (transport *Transport) proxyServiceRequest(request *http.Request, unversionedPath string) (*http.Response, error) {
 	requestPath := unversionedPath
+
+	isAdmin, _ := transport.isAdminOrEndpointAdmin(request)
+
+	if ! isAdmin {
+		return utils.WriteAccessForbiddenResponse()
+	}
 
 	switch requestPath {
 	case "/services/create":
@@ -300,6 +328,12 @@ func (transport *Transport) proxyServiceRequest(request *http.Request, unversion
 func (transport *Transport) proxyVolumeRequest(request *http.Request, unversionedPath string) (*http.Response, error) {
 	requestPath := unversionedPath
 
+	isAdmin, _ := transport.isAdminOrEndpointAdmin(request)
+
+	if ! isAdmin {
+		return utils.WriteAccessForbiddenResponse()
+	}
+
 	switch requestPath {
 	case "/volumes/create":
 		return transport.decorateVolumeResourceCreationOperation(request, portainer.VolumeResourceControl)
@@ -318,6 +352,12 @@ func (transport *Transport) proxyVolumeRequest(request *http.Request, unversione
 
 func (transport *Transport) proxyNetworkRequest(request *http.Request, unversionedPath string) (*http.Response, error) {
 	requestPath := unversionedPath
+
+	isAdmin, _ := transport.isAdminOrEndpointAdmin(request)
+
+	if ! isAdmin {
+		return utils.WriteAccessForbiddenResponse()
+	}
 
 	switch requestPath {
 	case "/networks/create":
@@ -343,6 +383,12 @@ func (transport *Transport) proxyNetworkRequest(request *http.Request, unversion
 func (transport *Transport) proxySecretRequest(request *http.Request, unversionedPath string) (*http.Response, error) {
 	requestPath := unversionedPath
 
+	isAdmin, _ := transport.isAdminOrEndpointAdmin(request)
+
+	if ! isAdmin {
+		return utils.WriteAccessForbiddenResponse()
+	}
+
 	switch requestPath {
 	case "/secrets/create":
 		return transport.decorateGenericResourceCreationOperation(request, secretObjectIdentifier, portainer.SecretResourceControl)
@@ -367,6 +413,12 @@ func (transport *Transport) proxySecretRequest(request *http.Request, unversione
 func (transport *Transport) proxyNodeRequest(request *http.Request, unversionedPath string) (*http.Response, error) {
 	requestPath := unversionedPath
 
+	isAdmin, _ := transport.isAdminOrEndpointAdmin(request)
+
+	if ! isAdmin {
+		return utils.WriteAccessForbiddenResponse()
+	}
+
 	// Assume /nodes/{id}
 	if path.Base(requestPath) != "nodes" {
 		return transport.administratorOperation(request)
@@ -377,6 +429,12 @@ func (transport *Transport) proxyNodeRequest(request *http.Request, unversionedP
 
 func (transport *Transport) proxySwarmRequest(request *http.Request, unversionedPath string) (*http.Response, error) {
 	requestPath := unversionedPath
+
+	isAdmin, _ := transport.isAdminOrEndpointAdmin(request)
+
+	if ! isAdmin {
+		return utils.WriteAccessForbiddenResponse()
+	}
 
 	switch requestPath {
 	case "/swarm":
@@ -389,6 +447,12 @@ func (transport *Transport) proxySwarmRequest(request *http.Request, unversioned
 
 func (transport *Transport) proxyTaskRequest(request *http.Request, unversionedPath string) (*http.Response, error) {
 	requestPath := unversionedPath
+
+	isAdmin, _ := transport.isAdminOrEndpointAdmin(request)
+
+	if ! isAdmin {
+		return utils.WriteAccessForbiddenResponse()
+	}
 
 	switch requestPath {
 	case "/tasks":
@@ -431,6 +495,13 @@ func (transport *Transport) updateDefaultGitBranch(request *http.Request) error 
 
 func (transport *Transport) proxyImageRequest(request *http.Request, unversionedPath string) (*http.Response, error) {
 	requestPath := unversionedPath
+
+	isAdmin, _ := transport.isAdminOrEndpointAdmin(request)
+	match, _ := path.Match("/images/*/json", requestPath)
+
+	if requestPath != "/images/json" && ! match && ! isAdmin {
+		return utils.WriteAccessForbiddenResponse() 
+	}
 
 	switch requestPath {
 	case "/images/create":

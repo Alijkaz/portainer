@@ -24,7 +24,7 @@ func NewHandler(bouncer security.BouncerService) *Handler {
 	h.Handle("/resource_controls",
 		bouncer.AdminAccess(httperror.LoggerHandler(h.resourceControlCreate))).Methods(http.MethodPost)
 	h.Handle("/resource_controls/{id}",
-		bouncer.AuthenticatedAccess(httperror.LoggerHandler(h.resourceControlUpdate))).Methods(http.MethodPut)
+		bouncer.AdminAccess(httperror.LoggerHandler(h.resourceControlUpdate))).Methods(http.MethodPut)
 	h.Handle("/resource_controls/{id}",
 		bouncer.AdminAccess(httperror.LoggerHandler(h.resourceControlDelete))).Methods(http.MethodDelete)
 	return h

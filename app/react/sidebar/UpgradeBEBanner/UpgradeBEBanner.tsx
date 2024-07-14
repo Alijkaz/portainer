@@ -58,8 +58,9 @@ function UpgradeBEBanner() {
   };
 
   if (
-    !enabledPlatforms.includes(systemInfo.platform) &&
-    process.env.NODE_ENV !== 'development'
+    (!enabledPlatforms.includes(systemInfo.platform) &&
+      process.env.NODE_ENV !== 'development') ||
+    !isPureAdmin
   ) {
     return null;
   }

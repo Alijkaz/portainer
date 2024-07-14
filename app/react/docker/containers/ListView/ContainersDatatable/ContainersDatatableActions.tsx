@@ -151,7 +151,7 @@ export function ContainersDatatableActions({
           </Button>
         </Authorized>
 
-        <Authorized authorizations="DockerContainerDelete">
+        <Authorized authorizations="DockerContainerDelete" adminOnlyCE>
           <Button
             color="dangerlight"
             data-cy="remove-docker-container-button"
@@ -165,7 +165,7 @@ export function ContainersDatatableActions({
       </ButtonGroup>
       {isAddActionVisible && (
         <div className="space-left">
-          <Authorized authorizations="DockerContainerCreate">
+          <Authorized authorizations="DockerContainerCreate" adminOnlyCE>
             <AddButton data-cy="add-docker-container-button">
               Add container
             </AddButton>

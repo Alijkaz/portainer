@@ -74,30 +74,37 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         platformPath="docker"
         data-cy="dockerSidebar-dashboard"
       />
-      <SidebarParent
-        icon={Edit}
-        label="Templates"
-        to="docker.templates"
-        params={{ endpointId: environmentId }}
-        data-cy="portainerSidebar-templates"
-        listId="dockerSidebar-templates"
+
+      <Authorized
+        authorizations="DockerTemplates"
+        adminOnlyCE
+        environmentId={environmentId}
       >
-        <SidebarItem
-          label="Application"
+        <SidebarParent
+          icon={Edit}
+          label="Templates"
           to="docker.templates"
-          ignorePaths={['docker.templates.custom']}
           params={{ endpointId: environmentId }}
-          isSubMenu
-          data-cy="portainerSidebar-appTemplates"
-        />
-        <SidebarItem
-          label="Custom"
-          to="docker.templates.custom"
-          params={{ endpointId: environmentId }}
-          isSubMenu
-          data-cy="dockerSidebar-customTemplates"
-        />
-      </SidebarParent>
+          data-cy="portainerSidebar-templates"
+          listId="dockerSidebar-templates"
+        >
+          <SidebarItem
+            label="Application"
+            to="docker.templates"
+            ignorePaths={['docker.templates.custom']}
+            params={{ endpointId: environmentId }}
+            isSubMenu
+            data-cy="portainerSidebar-appTemplates"
+          />
+          <SidebarItem
+            label="Custom"
+            to="docker.templates.custom"
+            params={{ endpointId: environmentId }}
+            isSubMenu
+            data-cy="dockerSidebar-customTemplates"
+          />
+        </SidebarParent>
+      </Authorized>
 
       {areStacksVisible && (
         <SidebarItem
@@ -127,27 +134,33 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         data-cy="dockerSidebar-containers"
       />
 
-      <SidebarItem
-        to="docker.images"
-        params={{ endpointId: environmentId }}
-        icon={List}
-        label="Images"
-        data-cy="dockerSidebar-images"
-      />
-
-      <SidebarItem
-        to="docker.networks"
-        params={{ endpointId: environmentId }}
-        icon={Network}
-        label="Networks"
-        data-cy="dockerSidebar-networks"
-      />
-
-      <VolumesLink
+      <Authorized
+        authorizations="DockerImages, DockerNetworks"
+        adminOnlyCE
         environmentId={environmentId}
-        platformPath="docker"
-        data-cy="dockerSidebar-volumes"
-      />
+      >
+        <SidebarItem
+          to="docker.images"
+          params={{ endpointId: environmentId }}
+          icon={List}
+          label="Images"
+          data-cy="dockerSidebar-images"
+        />
+
+        <SidebarItem
+          to="docker.networks"
+          params={{ endpointId: environmentId }}
+          icon={Network}
+          label="Networks"
+          data-cy="dockerSidebar-networks"
+        />
+
+        <VolumesLink
+          environmentId={environmentId}
+          platformPath="docker"
+          data-cy="dockerSidebar-volumes"
+        />
+      </Authorized>
 
       {apiVersion >= 1.3 && isSwarmManager && (
         <SidebarItem
@@ -179,28 +192,28 @@ export function DockerSidebar({ environmentId, environment }: Props) {
         />
       )}
 
-      <SidebarParent
-        label={setupSubMenuProps.label}
-        icon={setupSubMenuProps.icon}
-        to={setupSubMenuProps.to}
-        params={{ endpointId: environmentId }}
-        data-cy="portainerSidebar-host-area"
-        listId="portainerSidebar-host-area"
+      <Authorized
+        authorizations="PortainerEndpointUpdateSettings"
+        adminOnlyCE
+        environmentId={environmentId}
       >
-        <SidebarItem
-          label="Details"
-          isSubMenu
+        <SidebarParent
+          label={setupSubMenuProps.label}
+          icon={setupSubMenuProps.icon}
           to={setupSubMenuProps.to}
           params={{ endpointId: environmentId }}
-          ignorePaths={[featSubMenuTo, registrySubMenuTo]}
-          data-cy={setupSubMenuProps.dataCy}
-        />
-
-        <Authorized
-          authorizations="PortainerEndpointUpdateSettings"
-          adminOnlyCE
-          environmentId={environmentId}
+          data-cy="portainerSidebar-host-area"
+          listId="portainerSidebar-host-area"
         >
+          <SidebarItem
+            label="Details"
+            isSubMenu
+            to={setupSubMenuProps.to}
+            params={{ endpointId: environmentId }}
+            ignorePaths={[featSubMenuTo, registrySubMenuTo]}
+            data-cy={setupSubMenuProps.dataCy}
+          />
+
           <SidebarItem
             label="Setup"
             isSubMenu
@@ -208,16 +221,16 @@ export function DockerSidebar({ environmentId, environment }: Props) {
             params={{ endpointId: environmentId }}
             data-cy="portainerSidebar-docker-setup"
           />
-        </Authorized>
 
-        <SidebarItem
-          label="Registries"
-          isSubMenu
-          to={registrySubMenuTo}
-          params={{ endpointId: environmentId }}
-          data-cy="portainerSidebar-docker-registries"
-        />
-      </SidebarParent>
+          <SidebarItem
+            label="Registries"
+            isSubMenu
+            to={registrySubMenuTo}
+            params={{ endpointId: environmentId }}
+            data-cy="portainerSidebar-docker-registries"
+          />
+        </SidebarParent>
+      </Authorized>
     </>
   );
 }

@@ -49,72 +49,74 @@ export function DashboardView() {
       <div className="mx-4 space-y-6">
         <InfoPanels isAgent={isAgentEnvironment(env.Type)} />
 
-        <DashboardGrid>
-          {isStacksVisible && (
+        {isEnvAdminQuery.authorized && (
+          <DashboardGrid>
+            {isStacksVisible && (
+              <DashboardItem
+                to="docker.stacks"
+                icon={LayersIcon}
+                type="Stack"
+                value={dashboardStats.stacks}
+                data-cy="stacks"
+              />
+            )}
+
+            {isSwarmManager && (
+              <DashboardItem
+                to="docker.services"
+                icon={ShuffleIcon}
+                type="Service"
+                value={dashboardStats.services}
+                data-cy="services"
+              />
+            )}
+
             <DashboardItem
-              to="docker.stacks"
-              icon={LayersIcon}
-              type="Stack"
-              value={dashboardStats.stacks}
-              data-cy="stacks"
-            />
-          )}
+              to="docker.containers"
+              icon={BoxIcon}
+              type="Container"
+              value={dashboardStats.containers.total}
+              data-cy="containers"
+            >
+              <ContainerStatus stats={dashboardStats.containers} />
+            </DashboardItem>
 
-          {isSwarmManager && (
             <DashboardItem
-              to="docker.services"
-              icon={ShuffleIcon}
-              type="Service"
-              value={dashboardStats.services}
-              data-cy="services"
-            />
-          )}
+              to="docker.images"
+              icon={ListIcon}
+              type="Image"
+              value={dashboardStats.images.total}
+              data-cy="images"
+            >
+              <ImagesTotalSize imagesTotalSize={dashboardStats.images.size} />
+            </DashboardItem>
 
-          <DashboardItem
-            to="docker.containers"
-            icon={BoxIcon}
-            type="Container"
-            value={dashboardStats.containers.total}
-            data-cy="containers"
-          >
-            <ContainerStatus stats={dashboardStats.containers} />
-          </DashboardItem>
-
-          <DashboardItem
-            to="docker.images"
-            icon={ListIcon}
-            type="Image"
-            value={dashboardStats.images.total}
-            data-cy="images"
-          >
-            <ImagesTotalSize imagesTotalSize={dashboardStats.images.size} />
-          </DashboardItem>
-
-          <DashboardItem
-            to="docker.volumes"
-            icon={DatabaseIcon}
-            type="Volume"
-            value={dashboardStats.volumes}
-            data-cy="volumes"
-          />
-
-          <DashboardItem
-            to="docker.networks"
-            icon={NetworkIcon}
-            type="Network"
-            value={dashboardStats.networks}
-            data-cy="networks"
-          />
-
-          {env.EnableGPUManagement && isStandalone && (
             <DashboardItem
-              icon={CpuIcon}
-              type="GPU"
-              value={env.Gpus?.length}
-              data-cy="gpus"
+              to="docker.volumes"
+              icon={DatabaseIcon}
+              type="Volume"
+              value={dashboardStats.volumes}
+              data-cy="volumes"
             />
-          )}
-        </DashboardGrid>
+
+            <DashboardItem
+              to="docker.networks"
+              icon={NetworkIcon}
+              type="Network"
+              value={dashboardStats.networks}
+              data-cy="networks"
+            />
+
+            {env.EnableGPUManagement && isStandalone && (
+              <DashboardItem
+                icon={CpuIcon}
+                type="GPU"
+                value={env.Gpus?.length}
+                data-cy="gpus"
+              />
+            )}
+          </DashboardGrid>
+        )}
       </div>
 
       <div className="pt-6" />

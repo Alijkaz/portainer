@@ -328,14 +328,17 @@ angular.module('portainer.docker').controller('ContainerController', [
 
     var provider = $scope.applicationState.endpoint.mode.provider;
     var apiVersion = $scope.applicationState.endpoint.apiVersion;
-    NetworkService.networks(provider === 'DOCKER_STANDALONE' || provider === 'DOCKER_SWARM_MODE', false, provider === 'DOCKER_SWARM_MODE' && apiVersion >= 1.25)
-      .then(function success(data) {
-        var networks = data;
-        $scope.availableNetworks = networks;
-      })
-      .catch(function error(err) {
-        Notifications.error('Failure', err, 'Unable to retrieve networks');
-      });
+
+    if (Authentication.isAdmin()) {
+      NetworkService.networks(provider === 'DOCKER_STANDALONE' || provider === 'DOCKER_SWARM_MODE', false, provider === 'DOCKER_SWARM_MODE' && apiVersion >= 1.25)
+        .then(function success(data) {
+          var networks = data;
+          $scope.availableNetworks = networks;
+        })
+        .catch(function error(err) {
+          Notifications.error('Failure', err, 'Unable to retrieve networks');
+        });
+    }
 
     update();
   },
